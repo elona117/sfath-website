@@ -55,7 +55,8 @@ const ApostolicGuide: React.FC<ApostolicGuideProps> = ({ onNavigate }) => {
     setIsTyping(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/gemini', {
+      // FIXED: Use relative path for Vite proxy
+      const apiResponse = await fetch('/api/gemini', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,11 +64,11 @@ const ApostolicGuide: React.FC<ApostolicGuideProps> = ({ onNavigate }) => {
         body: JSON.stringify({ prompt: userMessage }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
+      if (!apiResponse.ok) {
+        throw new Error(`Server error: ${apiResponse.status}`);
       }
 
-      const data = await response.json();
+      const data = await apiResponse.json();
       const botReply = data.text || 'I am the Apostolic Guide. How may I serve you in the way of order?';
 
       const botTimestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -204,7 +205,7 @@ const ApostolicGuide: React.FC<ApostolicGuideProps> = ({ onNavigate }) => {
                   onNavigate('ADMISSIONS');
                   setIsOpen(false);
                 }}
-                className="text-[8px] sm:text-[9px] uppercase tracking-[0.4em] font-black text-[#C9A24D]/40 hover:text-[#C9A24D] transition-all hover:tracking-[0.5em] active:scale-90"
+                className="text-[8px] sm:text-[9px] uppercase tracking-[0.4em] font-black text-[#C9A24D]/40 hover:text-[#C9A24D] transition-all active:scale-90"
               >
                 Registry
               </button>
@@ -214,7 +215,7 @@ const ApostolicGuide: React.FC<ApostolicGuideProps> = ({ onNavigate }) => {
                   onNavigate('TRAINING');
                   setIsOpen(false);
                 }}
-                className="text-[8px] sm:text-[9px] uppercase tracking-[0.4em] font-black text-[#C9A24D]/40 hover:text-[#C9A24D] transition-all hover:tracking-[0.5em] active:scale-90"
+                className="text-[8px] sm:text-[9px] uppercase tracking-[0.4em] font-black text-[#C9A24D]/40 hover:text-[#C9A24D] transition-all active:scale-90"
               >
                 Systems
               </button>
@@ -224,7 +225,7 @@ const ApostolicGuide: React.FC<ApostolicGuideProps> = ({ onNavigate }) => {
                   onNavigate('RESOURCES');
                   setIsOpen(false);
                 }}
-                className="text-[8px] sm:text-[9px] uppercase tracking-[0.4em] font-black text-[#C9A24D]/40 hover:text-[#C9A24D] transition-all hover:tracking-[0.5em] active:scale-90"
+                className="text-[8px] sm:text-[9px] uppercase tracking-[0.4em] font-black text-[#C9A24D]/40 hover:text-[#C9A24D] transition-all active:scale-90"
               >
                 Vault
               </button>
