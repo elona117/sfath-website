@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { GoogleGenAI } from '@google/genai';
 import { ViewState } from '../types';
 
 interface ApostolicGuideProps {
@@ -30,7 +29,7 @@ const ApostolicGuide: React.FC<ApostolicGuideProps> = ({ onNavigate }) => {
     }
   }, [messages, isTyping]);
 
-  // Simple parser to handle **bold** text for better legibility as requested
+  // Simple parser to handle **bold** text
   const formatText = (text: string) => {
     const parts = text.split(/(\*\*.*?\*\*)/g);
     return parts.map((part, i) => {
@@ -48,65 +47,41 @@ const ApostolicGuide: React.FC<ApostolicGuideProps> = ({ onNavigate }) => {
   const handleSend = async () => {
     if (!input.trim() || isTyping) return;
 
-    const userMsg = input.trim();
-    const timestamp = new Date().toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    const userMessage = input.trim();
+    const userTimestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+    setMessages(prev => [...prev, { role: 'user', text: userMessage, timestamp: userTimestamp }]);
     setInput('');
-    setMessages((prev) => [
-      ...prev,
-      { role: 'user', text: userMsg, timestamp },
-    ]);
     setIsTyping(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: userMsg,
-        config: {
-          systemInstruction: `You are the Apostolic Guide for SFATH (Spirit Filled Apostolic Training Hub). 
-          Your tone is sacred, serious, encouraging, authoritative yet humble. 
-          SFATH's mission is "Raising a global company of Spirit-filled apostles for Kingdom advancement. Restoring apostolic order across the nations."
-          The training pathways are: 
-          1. **Nexus (Foundations)** - Twelve-week immersion into the core tenets. 
-          2. **Praxis (Formation)** - Nine-month journey of spiritual discipline. 
-          3. **Ekballo Lab (Deployment)** - Six-month intensive for strategic mission. 
-          4. **Fellowship (Covering)** - Ongoing institutional alignment.
-          Direct interested students to enrollment/admissions. Keep responses concise but spiritually weighted.
-          Speak in high institutional language. Use terms like "Alignment", "Governance", "Chancery", "Vault", "Pathways".
-          Use **bolding** (double asterisks) for important terms like Pathway names.`,
+      const response = await fetch('http://localhost:5000/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ prompt: userMessage }),
       });
 
-      const botText =
-        response.text ||
-        'I apologize, the connection to the Vault is temporarily obscured. How else may I serve you?';
-      setMessages((prev) => [
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const botReply = data.text || 'I am the Apostolic Guide. How may I serve you in the way of order?';
+
+      const botTimestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      setMessages(prev => [
         ...prev,
-        {
-          role: 'bot',
-          text: botText,
-          timestamp: new Date().toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
-        },
+        { role: 'bot', text: botReply, timestamp: botTimestamp }
       ]);
     } catch (error) {
-      console.error(error);
-      setMessages((prev) => [
+      console.error('Apostolic Guide Error:', error);
+      const errorTimestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setMessages(prev => [
         ...prev,
-        {
-          role: 'bot',
-          text: 'Forgive me, my discernment is limited at this moment. Please try again later.',
-          timestamp: new Date().toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
-        },
+        { role: 'bot', text: 'The Guide is temporarily unavailable. Please try again shortly.', timestamp: errorTimestamp }
       ]);
     } finally {
       setIsTyping(false);
@@ -172,8 +147,7 @@ const ApostolicGuide: React.FC<ApostolicGuideProps> = ({ onNavigate }) => {
                   className={`flex flex-col gap-2 max-w-[90%] sm:max-w-[85%] ${m.role === 'user' ? 'items-end' : 'items-start'}`}
                 >
                   <span className="text-[7px] uppercase tracking-widest text-white/20 font-black px-1">
-                    {m.role === 'bot' ? 'Chancery Uplink' : 'Seeker'} •{' '}
-                    {m.timestamp}
+                    {m.role === 'bot' ? 'Chancery Uplink' : 'Seeker'} • {m.timestamp}
                   </span>
                   <div
                     className={`px-5 py-4 sm:px-6 sm:py-4 text-[12px] sm:text-[13.5px] leading-[1.6] tracking-wide shadow-2xl ${
@@ -195,14 +169,8 @@ const ApostolicGuide: React.FC<ApostolicGuideProps> = ({ onNavigate }) => {
                 </span>
                 <div className="bg-white/5 border border-white/10 px-5 py-4 rounded-t-[1.5rem] rounded-br-[1.5rem] flex gap-1.5 items-center">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#C9A24D] animate-bounce"></div>
-                  <div
-                    className="w-1.5 h-1.5 rounded-full bg-[#C9A24D] animate-bounce"
-                    style={{ animationDelay: '0.2s' }}
-                  ></div>
-                  <div
-                    className="w-1.5 h-1.5 rounded-full bg-[#C9A24D] animate-bounce"
-                    style={{ animationDelay: '0.4s' }}
-                  ></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#C9A24D] animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#C9A24D] animate-bounce" style={{ animationDelay: '0.4s' }}></div>
                 </div>
               </div>
             )}
@@ -224,11 +192,7 @@ const ApostolicGuide: React.FC<ApostolicGuideProps> = ({ onNavigate }) => {
                 disabled={isTyping}
                 className="absolute right-2.5 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#C9A24D] text-[#0B1C2D] flex items-center justify-center hover:scale-105 active:scale-95 transition-all disabled:opacity-30 shadow-[0_0_20px_rgba(201,162,77,0.4)]"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
                 </svg>
               </button>
@@ -272,7 +236,6 @@ const ApostolicGuide: React.FC<ApostolicGuideProps> = ({ onNavigate }) => {
           onClick={() => setIsOpen(true)}
           className="relative w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-[#0B1C2D] text-[#C9A24D] shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all border border-[#C9A24D]/30 group overflow-hidden"
         >
-          {/* Pulsing Aura */}
           <div className="absolute inset-0 bg-[#C9A24D]/5 animate-pulse group-hover:bg-[#C9A24D]/15 transition-all"></div>
 
           <div className="absolute -top-12 right-0 glass-dark border border-white/10 px-5 py-2 rounded-xl text-[8px] font-black uppercase tracking-[0.3em] text-[#C9A24D] shadow-2xl opacity-0 group-hover:opacity-100 transition-all pointer-events-none whitespace-nowrap translate-y-2 group-hover:translate-y-0 hidden sm:block">

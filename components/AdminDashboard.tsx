@@ -5,7 +5,6 @@ import {
   Communique,
   StatureMetrics,
 } from '../types';
-import { GoogleGenAI } from '@google/genai';
 
 interface AdminDashboardProps {
   applications: Application[];
@@ -61,78 +60,33 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'Approval':
         return (
           <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2.5"
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
         );
       case 'Rejection':
         return (
           <div className="w-8 h-8 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2.5"
-                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
         );
       case 'Inquiry':
         return (
           <div className="w-8 h-8 rounded-full bg-[#C9A24D]/20 text-[#C9A24D] flex items-center justify-center">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2.5"
-                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-              />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
           </div>
         );
       default:
         return (
           <div className="w-8 h-8 rounded-full bg-stone-500/20 text-stone-500 flex items-center justify-center">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2.5"
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2.5"
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
         );
@@ -151,8 +105,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setDispatchProgress(5);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
       addLog(`Connecting to Hub Relays...`);
       setDispatchProgress(15);
       await new Promise((r) => setTimeout(r, 800));
@@ -166,14 +118,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         Tone: High-institutional, spiritually urgent, visionary, and welcoming. 
         Length: Max 100 words.`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: prompt,
+      const apiResponse = await fetch('http://localhost:5000/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
       });
 
-      const summonsText =
-        response.text ||
-        'The gates of the Hub are now open. Your season of formation has arrived. Proceed to the registry.';
+      const data = await apiResponse.json();
+      const summonsText = data.text || 'The gates of the Hub are now open. Your season of formation has arrived. Proceed to the registry.';
 
       addLog('Summons content generated and authenticated.');
       setDispatchProgress(50);
@@ -220,8 +172,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setDispatchProgress(5);
 
       try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
         addLog(`Uplinking to SMTP Registry for ${selectedApp.email}...`);
         setDispatchProgress(20);
         await new Promise((r) => setTimeout(r, 600));
@@ -241,14 +191,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
              Program: ${selectedApp.program}
              Tone: Serious, spiritually encouraging but final. Max 80 words.`;
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-3-flash-preview',
-          contents: prompt,
+        const apiResponse = await fetch('http://localhost:5000/api/gemini', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt }),
         });
 
-        const content =
-          response.text ||
-          'Alignment result pending further institutional review.';
+        const data = await apiResponse.json();
+        const content = data.text || 'Alignment result pending further institutional review.';
 
         addLog('Communique drafted. Encrypting transmission...');
         setDispatchProgress(60);
