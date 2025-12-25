@@ -1,19 +1,21 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SFATH — Spirit Filled Apostolic Training Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@200;300;400;500;600;700&family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@200;300;400;500;600;700&family=Cinzel:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
     <style>
       :root {
-        --brand-navy: #0B1C2D;
-        --brand-gold: #C9A24D;
-        --brand-cream: #F9F9F7;
+        --brand-navy: #0b1c2d;
+        --brand-gold: #c9a24d;
+        --brand-cream: #f9f9f7;
       }
       body {
         font-family: 'Inter', sans-serif;
@@ -22,10 +24,10 @@
         overflow-x: hidden;
         -webkit-font-smoothing: antialiased;
       }
-      
+
       /* Cinematic Grain Effect */
       body::after {
-        content: "";
+        content: '';
         position: fixed;
         top: 0;
         left: 0;
@@ -37,14 +39,22 @@
         z-index: 9999;
       }
 
-      h1, h2, h3, h4, .font-serif {
+      h1,
+      h2,
+      h3,
+      h4,
+      .font-serif {
         font-family: 'Playfair Display', serif;
       }
       .font-cinzel {
         font-family: 'Cinzel', serif;
       }
       .academic-grid {
-        background-image: radial-gradient(circle at 1px 1px, #e5e7eb 1px, transparent 0);
+        background-image: radial-gradient(
+          circle at 1px 1px,
+          #e5e7eb 1px,
+          transparent 0
+        );
         background-size: 40px 40px;
       }
       .glass {
@@ -57,7 +67,7 @@
         backdrop-filter: blur(25px);
         -webkit-backdrop-filter: blur(25px);
       }
-      
+
       /* Sophisticated Shimmer */
       .shimmer {
         position: relative;
@@ -65,7 +75,7 @@
         background: #f1f1f0;
       }
       .shimmer::after {
-        content: "";
+        content: '';
         position: absolute;
         top: 0;
         right: 0;
@@ -83,7 +93,9 @@
       }
 
       @keyframes shimmer {
-        100% { transform: translateX(100%); }
+        100% {
+          transform: translateX(100%);
+        }
       }
 
       /* Smooth Section Entrances */
@@ -91,26 +103,47 @@
         animation: reveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
       @keyframes reveal {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       @keyframes spin-slow {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
       }
       .animate-spin-slow {
         animation: spin-slow 12s linear infinite;
       }
 
       /* Custom Scrollbar */
-      ::-webkit-scrollbar { width: 5px; }
-      ::-webkit-scrollbar-track { background: var(--brand-cream); }
-      ::-webkit-scrollbar-thumb { background: var(--brand-gold); border-radius: 10px; }
-      
+      ::-webkit-scrollbar {
+        width: 5px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--brand-cream);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--brand-gold);
+        border-radius: 10px;
+      }
+
       @keyframes marquee {
-        0% { transform: translateX(0); }
-        100% { transform: translateX(-50%); }
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-50%);
+        }
       }
       .animate-marquee {
         animation: marquee 50s linear infinite;
@@ -143,25 +176,28 @@
         main {
           padding-top: 0 !important;
         }
-        .fixed, nav, footer, #apostolic-guide-trigger {
+        .fixed,
+        nav,
+        footer,
+        #apostolic-guide-trigger {
           display: none !important;
         }
       }
     </style>
     <script type="importmap">
-    {
-      "imports": {
-        "react/": "https://esm.sh/react@^19.2.3/",
-        "react": "https://esm.sh/react@^19.2.3",
-        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-        "@google/genai": "https://esm.sh/@google/genai"
+      {
+        "imports": {
+          "react/": "https://esm.sh/react@^19.2.3/",
+          "react": "https://esm.sh/react@^19.2.3",
+          "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+          "@google/genai": "https://esm.sh/@google/genai"
+        }
       }
-    }
     </script>
-  <link rel="stylesheet" href="/index.css">
-</head>
+    <link rel="stylesheet" href="/index.css" />
+  </head>
   <body class="academic-grid">
     <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
-</body>
+    <script type="module" src="/index.tsx"></script>
+  </body>
 </html>

@@ -1,9 +1,8 @@
-
 export enum ProgramType {
   NEXUS = 'Nexus',
   PRAXIS = 'Praxis',
   EKBALLO = 'Ekballo Lab',
-  FELLOWSHIP = 'Fellowship'
+  FELLOWSHIP = 'Fellowship',
 }
 
 export interface StatureMetrics {
@@ -52,4 +51,15 @@ export interface Resource {
   fullText?: string;
 }
 
-export type ViewState = 'HOME' | 'ABOUT' | 'MANDATE' | 'TRAINING' | 'ADMISSIONS' | 'LEADERSHIP' | 'RESOURCES' | 'ADMIN' | 'PROGRAM_DETAIL' | 'CONTACT' | 'PORTAL';
+export type ViewState =
+  | 'HOME'
+  | 'ABOUT'
+  | 'MANDATE'
+  | 'TRAINING'
+  | 'ADMISSIONS'
+  | 'LEADERSHIP'
+  | 'RESOURCES'
+  | 'ADMIN'
+  | 'PROGRAM_DETAIL'
+  | 'CONTACT'
+  | 'PORTAL';
