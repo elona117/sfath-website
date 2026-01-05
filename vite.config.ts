@@ -6,6 +6,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
 
   return {
+    base: '/',  // ← ADD THIS LINE (or change if it's something else)
     server: {
       port: 3000,
       host: '0.0.0.0',
