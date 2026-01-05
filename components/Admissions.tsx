@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ProgramType, ViewState, Application } from '../types';
 import { GoogleGenAI } from '@google/genai';
+import { supabase } from '../lib/supabaseClient';
 
 interface AdmissionsProps {
   isOpen: boolean;
@@ -168,6 +169,31 @@ const Admissions: React.FC<AdmissionsProps> = ({
       setDispatchStep('Finalizing Submission...');
       await new Promise((r) => setTimeout(r, 1000));
 
+      // Save real application to Supabase
+      const { data: insertedData, error: insertError } = await supabase
+        .from('applications')
+        .insert([
+          {
+            full_name: formData.fullName,
+            email: formData.email,
+            program: formData.program,
+            experience: formData.experience,
+            statement: formData.statement,
+            status: 'New',
+            acknowledgmentText: decree, // Store decree
+            phone: formData.phone, // Include phone if you have the column
+          },
+        ])
+        .select();
+
+      if (insertError) {
+        console.error('Supabase insert error:', insertError);
+        throw insertError; // This will go to catch block
+      }
+
+      console.log('Application saved to Supabase successfully:', insertedData);
+
+      // Keep your original onSubmit call
       onSubmit({
         ...formData,
         acknowledgmentText: decree,
@@ -179,7 +205,11 @@ const Admissions: React.FC<AdmissionsProps> = ({
     } catch (error) {
       console.error('Submission Error:', error);
       setIsDispatching(false);
-      onSubmit(formData);
+      // Fallback: still show receipt even if Supabase fails
+      onSubmit({
+        ...formData,
+        acknowledgmentText: personalDecree || 'Fallback decree due to error.',
+      });
       setSubmitted(true);
     }
   };
@@ -430,7 +460,7 @@ const Admissions: React.FC<AdmissionsProps> = ({
         <div className="lg:col-span-5 space-y-10">
           <div className="space-y-6">
             <p className="text-[#C9A24D] uppercase tracking-[0.5em] text-[10px] font-black">
-              2025 Cycle Active
+              2026 Cycle Active
             </p>
             <h1 className="text-4xl sm:text-6xl font-black text-[#0B1C2D] leading-none">
               Begin Hub{' '}
@@ -698,3 +728,36 @@ const Admissions: React.FC<AdmissionsProps> = ({
 };
 
 export default Admissions;
+<button
+  type="button"
+  onClick={async () => {
+    try {
+      const testData = {
+        full_name: "Test User",
+        email: "test@example.com",
+        program: "Nexus",
+        experience: "Test experience",
+        statement: "Test statement",
+        phone: "123456789",
+        acknowledgmentText: "Test decree"
+      };
+
+      console.log("Sending test insert:", testData);
+
+      const { data, error } = await supabase
+        .from('applications')
+        .insert([testData])
+        .select();
+
+      if (error) throw error;
+
+      console.log("Test insert SUCCESS:", data);
+      alert("Test row saved! Check Supabase table.");
+    } catch (err) {
+      console.error("Test insert FAILED:", err);
+      alert("Failed — check console for error");
+    }
+  }}
+>
+  Quick Test Insert
+</button>

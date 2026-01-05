@@ -33,14 +33,14 @@ const Resources: React.FC = () => {
     },
     {
       id: '3',
-      title: '2025 Academic Calendar',
+      title: '2026 Academic Calendar',
       category: 'Download',
       author: 'Campus Administration',
       date: '2024-11-20',
       summary:
-        'Comprehensive overview of cohort start dates, intensives, and synod gatherings for 2025.',
+        'Comprehensive overview of cohort start dates, intensives, and synod gatherings for 2026.',
       fullText:
-        'The 2025 Academic Cycle begins with the Nexus Induction in February. Following this, the Praxis Cohort will engage in the souls-formation intensive during the second quarter. The year concludes with the Ekballo Deployment Lab, where students are assigned to territorial projects globally.',
+        'The 2026 Academic Cycle begins with the Nexus Induction in February. Following this, the Praxis Cohort will engage in the souls-formation intensive during the second quarter. The year concludes with the Ekballo Deployment Lab, where students are assigned to territorial projects globally.',
     },
     {
       id: '4',

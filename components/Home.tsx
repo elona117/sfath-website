@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ViewState, ProgramType } from '../types';
+import { supabase } from '../lib/supabaseClient';
 
 interface HomeProps {
   onNavigate: (view: ViewState) => void;
@@ -9,9 +10,12 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ onNavigate, onViewProgram }) => {
   const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
   const [pulseIndex, setPulseIndex] = useState(0);
+  const [waitlistEmail, setWaitlistEmail] = useState('');
+  const [waitlistMessage, setWaitlistMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false); // Prevent double submits & show loading
 
   const heartbeat = [
-    'Nexus Cohort 2025: 92% Capacity Reached',
+    'Nexus Cohort 2026: 92% Capacity Reached',
     'New Alignment Recorded: London, UK',
     'Vault Update: Governance Vol II Released',
     'Praxis Intensive: 14 Days to Launch',
@@ -52,6 +56,51 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onViewProgram }) => {
     { label: 'Cohorts', value: '12' },
   ];
 
+  const joinWaitlist = async () => {
+    const email = waitlistEmail.trim();
+
+    if (!email) {
+      setWaitlistMessage('Please enter your email address.');
+      return;
+    }
+
+    if (!email.includes('@') || !email.includes('.')) {
+      setWaitlistMessage('Please enter a valid email address.');
+      return;
+    }
+
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setWaitlistMessage(''); // Clear previous message
+
+    try {
+      const { data, error } = await supabase
+        .from('waitlist')
+        .insert([{ email }])
+        .select();
+
+      if (error) {
+        console.error('INSERT ERROR FULL DETAILS:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          request: { email },
+        });
+        throw error;
+      }
+
+      console.log('Successfully joined waitlist!', data);
+      setWaitlistMessage('Thank you! You have been added to the waitlist.');
+      setWaitlistEmail(''); // Clear input
+    } catch (error: any) {
+      console.error('Error joining waitlist:', error);
+      setWaitlistMessage('Something went wrong. Please try again later.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="overflow-hidden bg-[#F9F9F7]">
       {/* HERO SECTION */}
@@ -90,7 +139,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onViewProgram }) => {
 
           <h1 className="text-[10vw] sm:text-7xl lg:text-[8.5rem] font-black text-white mb-8 leading-[1] tracking-tighter max-w-5xl">
             Raising Spirit-Filled{' '}
-            <span className="text-[#C9A24D] italic font-serif">Apostles.</span>
+            <span className="italic font-serif text-[#C9A24D]">Apostles.</span>
           </h1>
 
           <p className="text-stone-300 text-base sm:text-xl lg:text-2xl font-light max-w-3xl mx-auto mb-12 leading-relaxed">
@@ -278,6 +327,51 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onViewProgram }) => {
           >
             Submit Integration Request
           </button>
+        </div>
+      </section>
+
+      {/* Waitlist Join Form */}
+      <section className="py-16 px-6 bg-[#F9F9F7] border-t border-stone-200">
+        <div className="max-w-2xl mx-auto text-center">
+          <h3 className="text-3xl font-black text-[#0B1C2D] mb-6">
+            Join the Waitlist
+          </h3>
+          <p className="text-stone-600 mb-8">
+            Be notified when the next admissions cycle opens.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+            <input
+              type="email"
+              placeholder="your.email@example.com"
+              value={waitlistEmail}
+              onChange={(e) => setWaitlistEmail(e.target.value)}
+              disabled={isSubmitting}
+              className="flex-1 px-6 py-4 rounded-full border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#C9A24D] text-sm disabled:opacity-50"
+            />
+            <button
+              onClick={joinWaitlist}
+              disabled={isSubmitting}
+              className={`px-8 py-4 rounded-full font-black uppercase tracking-widest transition-all ${
+                isSubmitting
+                  ? 'bg-[#C9A24D]/50 cursor-not-allowed'
+                  : 'bg-[#C9A24D] text-[#0B1C2D] hover:bg-[#b58f3e]'
+              }`}
+            >
+              {isSubmitting ? 'Joining...' : 'Join Now'}
+            </button>
+          </div>
+
+          {waitlistMessage && (
+            <p
+              className="mt-4 text-sm font-medium"
+              style={{
+                color: waitlistMessage.includes('Thank you') ? '#10B981' : '#EF4444',
+              }}
+            >
+              {waitlistMessage}
+            </p>
+          )}
         </div>
       </section>
     </div>

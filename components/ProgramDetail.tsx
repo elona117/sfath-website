@@ -174,7 +174,7 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({ program, onApply }) => {
               Apply to Program
             </button>
             <p className="mt-8 text-[9px] text-[#C9A24D]/40 text-center uppercase tracking-widest italic font-bold">
-              Institutional Registry SFATH-2025
+              Institutional Registry SFATH-2026
             </p>
           </div>
         </div>

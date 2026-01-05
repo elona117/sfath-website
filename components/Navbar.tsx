@@ -35,12 +35,12 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate }) => {
     <>
       <div className="fixed top-0 left-0 right-0 z-[60] bg-[#0B1C2D] text-[7px] sm:text-[9px] uppercase tracking-[0.4em] text-[#C9A24D] h-6 sm:h-8 flex items-center overflow-hidden whitespace-nowrap border-b border-[#C9A24D]/20">
         <div className="animate-marquee flex gap-12 sm:gap-16 items-center">
-          <span>• ADMISSIONS OPEN FOR NEXUS COHORT 2025</span>
+          <span>• ADMISSIONS OPEN FOR NEXUS COHORT 2026</span>
           <span>• APOSTOLIC SYNOD GATHERING: OCTOBER 12TH</span>
           <span>• RESTORING APOSTOLIC ORDER ACROSS THE NATIONS</span>
           <span>• SPIRIT-FILLED APPRENTICESHIP PROGRAM NOW ACTIVE</span>
           <span className="hidden sm:inline">
-            • ADMISSIONS OPEN FOR NEXUS COHORT 2025
+            • ADMISSIONS OPEN FOR NEXUS COHORT 2026
           </span>
           <span className="hidden sm:inline">
             • APOSTOLIC SYNOD GATHERING: OCTOBER 12TH

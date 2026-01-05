@@ -1,3 +1,4 @@
+import { supabase } from '../lib/supabaseClient';
 import React, { useState, useEffect } from 'react';
 import {
   Application,
@@ -5,10 +6,9 @@ import {
   Communique,
   StatureMetrics,
 } from '../types';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
 interface AdminDashboardProps {
-  applications: Application[];
-  waitlist: WaitlistEntry[];
   isCycleOpen: boolean;
   onUpdateStatus: (
     id: string,
@@ -18,38 +18,168 @@ interface AdminDashboardProps {
     stature?: StatureMetrics
   ) => void;
   onToggleCycle: () => void;
-  onClearWaitlist: () => void;
   onLogout: () => void;
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({
-  applications,
-  waitlist,
   isCycleOpen,
   onUpdateStatus,
   onToggleCycle,
-  onClearWaitlist,
   onLogout,
 }) => {
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'Apps' | 'Waitlist' | 'System'>(
-    'Apps'
-  );
+  const [activeTab, setActiveTab] = useState<'Apps' | 'Waitlist' | 'System'>('Apps');
   const [internalNotes, setInternalNotes] = useState('');
   const [filter, setFilter] = useState<Application['status'] | 'All'>('All');
+  const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([]);
+  const [isLoadingWaitlist, setIsLoadingWaitlist] = useState(true);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [isLoadingApps, setIsLoadingApps] = useState(true);
 
   const [isDispatching, setIsDispatching] = useState(false);
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [dispatchProgress, setDispatchProgress] = useState(0);
 
-  const selectedApp =
-    applications.find((app) => app.id === selectedAppId) || null;
+  // Auth state for conditional real-time
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Real-time channel state
+  const [realtimeChannel, setRealtimeChannel] = useState<RealtimeChannel | null>(null);
+
+  const selectedApp = applications.find((app) => app.id === selectedAppId) || null;
+
+  // Check authentication status
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     if (selectedApp) {
       setInternalNotes(selectedApp.internalNotes || '');
     }
   }, [selectedAppId, selectedApp?.internalNotes]);
+
+  // Helper to convert snake_case to camelCase
+  const toCamelCase = (str: string) => str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+
+  // Fetch applications from Supabase with snake_case to camelCase mapping
+  const fetchApplications = async () => {
+    setIsLoadingApps(true);
+    try {
+      const { data, error } = await supabase
+        .from('applications')
+        .select('*')
+        .order('submitted_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Convert snake_case to camelCase for all fields
+      const mappedData = data.map((row: any) => {
+        const camelRow: any = {};
+        Object.keys(row).forEach((key) => {
+          const camelKey = toCamelCase(key);
+          camelRow[camelKey] = row[key];
+        });
+        return camelRow;
+      });
+
+      setApplications(mappedData || []);
+    } catch (err) {
+      console.error('Failed to fetch applications:', err);
+    } finally {
+      setIsLoadingApps(false);
+    }
+  };
+
+  // Initial fetch for applications
+  useEffect(() => {
+    fetchApplications();
+  }, []);
+
+  // Fetch waitlist function
+  const fetchWaitlist = async () => {
+    setIsLoadingWaitlist(true);
+    try {
+      const { data, error } = await supabase
+        .from('waitlist')
+        .select('email, joined_at')
+        .order('joined_at', { ascending: false });
+
+      if (error) throw error;
+      setWaitlist(data || []);
+    } catch (err) {
+      console.error('Failed to fetch waitlist:', err);
+    } finally {
+      setIsLoadingWaitlist(false);
+    }
+  };
+
+  // Initial fetch on mount for waitlist
+  useEffect(() => {
+    fetchWaitlist();
+  }, []);
+
+  // Real-time subscription for waitlist (only when authenticated)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const channel = supabase
+      .channel('waitlist-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'waitlist'
+        },
+        (payload) => {
+          console.log('Waitlist real-time change:', payload);
+          fetchWaitlist();
+        }
+      )
+      .subscribe();
+
+    setRealtimeChannel(channel);
+
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, [isAuthenticated]);
+
+  // Real-time subscription for applications (only when authenticated)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const channel = supabase
+      .channel('applications-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'applications'
+        },
+        (payload) => {
+          console.log('Applications real-time change:', payload);
+          fetchApplications();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, [isAuthenticated]);
 
   const addLog = (msg: string) => {
     setTerminalLogs((prev) => [...prev.slice(-8), `> ${msg}`]);
@@ -113,12 +243,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setDispatchProgress(30);
 
       const prompt = `Draft a prestigious and sacred "Apostolic Summons" notification for seekers on the SFATH waitlist.
-        Context: The Admissions Cycle for 2025 is now officially OPEN.
+        Context: The Admissions Cycle for 2026 is now officially OPEN.
         Call to Action: Visit the Digital Hub to begin your formation pathway (Nexus).
         Tone: High-institutional, spiritually urgent, visionary, and welcoming. 
         Length: Max 100 words.`;
 
-      const apiResponse = await fetch('http://localhost:5000/api/gemini', {
+      const apiResponse = await fetch('/api/gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt }),
@@ -161,14 +291,34 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
+  const handleClearWaitlist = async () => {
+    if (!confirm('Are you sure you want to clear the entire waitlist? This cannot be undone.')) return;
+
+    try {
+      const { error } = await supabase
+        .from('waitlist')
+        .delete()
+        .not('id', 'is', null);
+
+      if (error) throw error;
+
+      setWaitlist([]);
+      alert('Waitlist cleared successfully.');
+    } catch (error) {
+      console.error('Error clearing waitlist:', error);
+      alert('Failed to clear waitlist. Please try again.');
+    }
+  };
+
   const handleStatusUpdate = async (status: Application['status']) => {
     if (!selectedApp) return;
 
+    let newCommunique: Communique | undefined = undefined;
+    let stature: StatureMetrics | undefined = undefined;
+
     if (status === 'Approved' || status === 'Declined') {
       setIsDispatching(true);
-      setTerminalLogs([
-        `INITIALIZING ${status.toUpperCase()} NOTIFICATION SEQUENCE...`,
-      ]);
+      setTerminalLogs([`INITIALIZING ${status.toUpperCase()} NOTIFICATION SEQUENCE...`]);
       setDispatchProgress(5);
 
       try {
@@ -191,35 +341,108 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
              Program: ${selectedApp.program}
              Tone: Serious, spiritually encouraging but final. Max 80 words.`;
 
-        const apiResponse = await fetch('http://localhost:5000/api/gemini', {
+        const apiResponse = await fetch('/api/gemini', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt }),
         });
 
         const data = await apiResponse.json();
-        const content = data.text || 'Alignment result pending further institutional review.';
+        let content = data.text || 'Alignment result pending further institutional review.';
+
+        // Convert Gemini markdown bold **text** → <strong>text</strong> for clean email rendering
+        content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
         addLog('Communique drafted. Encrypting transmission...');
         setDispatchProgress(60);
         await new Promise((r) => setTimeout(r, 500));
 
-        addLog(`Relaying via secure channel to ${selectedApp.fullName}...`);
-        setDispatchProgress(85);
-        await new Promise((r) => setTimeout(r, 800));
+        // UPDATE SUPABASE FIRST — status changes immediately
+        addLog(`Updating status to ${status}...`);
+        const { error: updateError } = await supabase
+          .from('applications')
+          .update({
+            status,
+            internal_notes: internalNotes,
+            communique_history: [...(selectedApp.communiqueHistory || []), {
+              id: Math.random().toString(36).substr(2, 9),
+              type: status === 'Approved' ? 'Approval' : 'Rejection',
+              subject: status === 'Approved' ? `Institutional Acceptance: ${selectedApp.program}` : `Alignment Determination: ${selectedApp.program}`,
+              content: content,
+              timestamp: new Date().toISOString(),
+            }],
+            stature: status === 'Approved' ? {
+              doctrine: Math.floor(Math.random() * 30) + 65,
+              weight: Math.floor(Math.random() * 40) + 50,
+              character: Math.floor(Math.random() * 20) + 80,
+              vision: Math.floor(Math.random() * 50) + 40,
+            } : undefined,
+          })
+          .eq('id', selectedApp.id);
 
-        const newCommunique: Communique = {
+        if (updateError) {
+          console.error('Supabase update failed:', updateError);
+          throw updateError;
+        }
+
+        addLog(`Status updated successfully. Refreshing registry...`);
+        await fetchApplications();
+
+        // Send real-time email notification
+        addLog(`Sending real-time email to ${selectedApp.email}...`);
+        setDispatchProgress(80);
+
+        const emailUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-application-email`;
+        console.log('[EMAIL DEBUG] Calling Edge Function:', emailUrl);
+        console.log('[EMAIL DEBUG] Using anon key (first 10 chars):', import.meta.env.VITE_SUPABASE_ANON_KEY?.substring(0, 10) + '...');
+
+        const emailBody = {
+          to: selectedApp.email,
+          subject: status === 'Approved' ? `SFATH Institutional Acceptance: ${selectedApp.program}` : `SFATH Alignment Determination: ${selectedApp.program}`,
+          html: `<div style="font-family: serif; color: #0B1C2D; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h1 style="color: #C9A24D; text-align: center;">SFATH Apostolic Chancery</h1>
+            <p>Dear ${selectedApp.fullName},</p>
+            <p>${content.replace(/\n/g, '<br>')}</p>
+            <p style="text-align: center; color: #C9A24D; font-style: italic; margin-top: 30px;">
+              Prepare for the journey ahead.
+            </p>
+            <p style="text-align: center; font-size: 12px; color: #888; margin-top: 40px;">
+              Spirit Filled Apostolic Hub • Institutional Registry
+            </p>
+          </div>`,
+        };
+        console.log('[EMAIL DEBUG] Payload sent to function:', JSON.stringify(emailBody, null, 2));
+
+        const emailResponse = await fetch(emailUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify(emailBody),
+        });
+
+        if (emailResponse.ok) {
+          const successData = await emailResponse.json();
+          addLog('Email notification sent successfully!');
+          console.log('[EMAIL SUCCESS]', successData);
+        } else {
+          const errText = await emailResponse.text();
+          console.error('[EMAIL ERROR]', emailResponse.status, errText);
+          addLog(`Email send failed (HTTP ${emailResponse.status}) — status updated anyway.`);
+        }
+
+        setDispatchProgress(100);
+
+        // Define for callback
+        newCommunique = {
           id: Math.random().toString(36).substr(2, 9),
           type: status === 'Approved' ? 'Approval' : 'Rejection',
-          subject:
-            status === 'Approved'
-              ? `Institutional Acceptance: ${selectedApp.program}`
-              : `Alignment Determination: ${selectedApp.program}`,
+          subject: status === 'Approved' ? `Institutional Acceptance: ${selectedApp.program}` : `Alignment Determination: ${selectedApp.program}`,
           content: content,
           timestamp: new Date().toISOString(),
         };
 
-        let stature: StatureMetrics | undefined = undefined;
         if (status === 'Approved') {
           stature = {
             doctrine: Math.floor(Math.random() * 30) + 65,
@@ -229,29 +452,30 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           };
         }
 
-        addLog('DISPATCH SUCCESSFUL. NOTIFICATION LOGGED.');
-        setDispatchProgress(100);
+        onUpdateStatus(selectedApp.id, status, internalNotes, newCommunique, stature);
 
-        onUpdateStatus(
-          selectedApp.id,
-          status,
-          internalNotes,
-          newCommunique,
-          stature
-        );
+        // Double-refresh to make sure UI is updated
+        setTimeout(() => fetchApplications(), 1000);
 
         setTimeout(() => {
           setIsDispatching(false);
           setTerminalLogs([]);
           setDispatchProgress(0);
-        }, 1500);
+        }, 2000);
       } catch (error) {
-        console.error(error);
+        console.error('Critical failure in handleStatusUpdate:', error);
         addLog('CRITICAL FAILURE: DISPATCH INTERRUPTED.');
         setTimeout(() => setIsDispatching(false), 2000);
       }
     } else {
-      onUpdateStatus(selectedApp.id, status, internalNotes);
+      // For 'Reviewed' — update notes only
+      await supabase
+        .from('applications')
+        .update({ internal_notes: internalNotes })
+        .eq('id', selectedApp.id);
+
+      onUpdateStatus(selectedApp.id, status, internalNotes, undefined, undefined);
+      await fetchApplications();
     }
   };
 
@@ -273,12 +497,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <div className="p-8 space-y-6">
               <div className="space-y-2 h-32 overflow-hidden text-stone-400">
                 {terminalLogs.map((log, i) => (
-                  <div
-                    key={i}
-                    className={
-                      i === terminalLogs.length - 1 ? 'text-[#C9A24D]' : ''
-                    }
-                  >
+                  <div key={i} className={i === terminalLogs.length - 1 ? 'text-[#C9A24D]' : ''}>
                     {log}
                   </div>
                 ))}
@@ -315,6 +534,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </h1>
           </div>
 
+          <button
+            onClick={() => supabase.auth.signOut()}
+            className="px-6 py-3 bg-rose-600 text-white rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-rose-700 transition-all shadow-lg"
+          >
+            Logout
+          </button>
+
           <nav className="flex bg-white p-1 rounded-full border border-stone-200 shadow-sm w-full lg:w-auto overflow-x-auto no-scrollbar">
             {['Apps', 'Waitlist', 'System'].map((tab) => (
               <button
@@ -344,32 +570,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 className={`w-24 h-24 rounded-full flex items-center justify-center transition-all duration-700 ${isCycleOpen ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}
               >
                 {isCycleOpen ? (
-                  <svg
-                    className="w-10 h-10"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 ) : (
-                  <svg
-                    className="w-10 h-10"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
               </div>
@@ -377,9 +583,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 onClick={onToggleCycle}
                 className={`w-full sm:w-auto px-12 py-6 rounded-full text-[10px] font-black uppercase tracking-[0.4em] transition-all shadow-xl hover:scale-105 active:scale-95 ${isCycleOpen ? 'bg-rose-600 text-white' : 'bg-emerald-600 text-white'}`}
               >
-                {isCycleOpen
-                  ? 'Suspend Enrollment'
-                  : 'Open Institutional Gates'}
+                {isCycleOpen ? 'Suspend Enrollment' : 'Open Institutional Gates'}
               </button>
             </div>
           </div>
@@ -406,7 +610,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </button>
                 <button
                   disabled={waitlist.length === 0}
-                  onClick={onClearWaitlist}
+                  onClick={handleClearWaitlist}
                   className="flex-1 sm:flex-none px-8 py-3 border border-stone-200 text-stone-400 rounded-full text-[9px] font-black uppercase tracking-widest hover:text-rose-600 hover:border-rose-200 transition-all disabled:opacity-30"
                 >
                   Clear List
@@ -414,26 +618,36 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
             </div>
             <div className="overflow-x-auto no-scrollbar">
-              <table className="w-full text-left">
-                <thead className="bg-stone-50 text-[8px] uppercase tracking-[0.3em] font-black text-stone-400">
-                  <tr>
-                    <th className="px-8 py-5">Email Credential</th>
-                    <th className="px-8 py-5">Registry Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-stone-50">
-                  {waitlist.map((entry, i) => (
-                    <tr key={i} className="hover:bg-stone-50 transition-colors">
-                      <td className="px-8 py-6 text-sm font-bold text-[#0B1C2D]">
-                        {entry.email}
-                      </td>
-                      <td className="px-8 py-6 text-[10px] text-stone-400 uppercase">
-                        {new Date(entry.joinedAt).toLocaleDateString()}
-                      </td>
+              {isLoadingWaitlist ? (
+                <div className="p-8 text-center text-stone-500">
+                  Loading waitlist...
+                </div>
+              ) : waitlist.length === 0 ? (
+                <div className="p-8 text-center text-stone-500">
+                  No one on the waitlist yet.
+                </div>
+              ) : (
+                <table className="w-full text-left">
+                  <thead className="bg-stone-50 text-[8px] uppercase tracking-[0.3em] font-black text-stone-400">
+                    <tr>
+                      <th className="px-8 py-5">Email Credential</th>
+                      <th className="px-8 py-5">Registry Date</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-stone-50">
+                    {waitlist.map((entry, i) => (
+                      <tr key={i} className="hover:bg-stone-50 transition-colors">
+                        <td className="px-8 py-6 text-sm font-bold text-[#0B1C2D]">
+                          {entry.email}
+                        </td>
+                        <td className="px-8 py-6 text-[10px] text-stone-400 uppercase">
+                          {new Date(entry.joined_at).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         )}
@@ -461,33 +675,43 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto no-scrollbar">
-                {filteredApps.map((app) => (
-                  <div
-                    key={app.id}
-                    onClick={() => setSelectedAppId(app.id)}
-                    className={`p-6 border-b border-stone-50 cursor-pointer transition-all hover:bg-stone-50 group ${selectedAppId === app.id ? 'bg-[#C9A24D]/5 border-l-4 border-l-[#C9A24D]' : ''}`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="text-sm font-bold text-[#0B1C2D] truncate">
-                        {app.fullName}
-                      </h4>
-                      <span
-                        className={`text-[7px] uppercase tracking-widest px-2 py-0.5 rounded-full font-bold ${
-                          app.status === 'Approved'
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : app.status === 'Declined'
-                              ? 'bg-rose-100 text-rose-700'
-                              : 'bg-stone-100 text-stone-500'
-                        }`}
-                      >
-                        {app.status}
-                      </span>
-                    </div>
-                    <p className="text-[9px] text-stone-400 uppercase tracking-widest font-medium">
-                      {app.program}
-                    </p>
+                {isLoadingApps ? (
+                  <div className="p-8 text-center text-stone-500">
+                    Loading applications...
                   </div>
-                ))}
+                ) : filteredApps.length === 0 ? (
+                  <div className="p-8 text-center text-stone-500">
+                    No applications yet.
+                  </div>
+                ) : (
+                  filteredApps.map((app) => (
+                    <div
+                      key={app.id}
+                      onClick={() => setSelectedAppId(app.id)}
+                      className={`p-6 border-b border-stone-50 cursor-pointer transition-all hover:bg-stone-50 group ${selectedAppId === app.id ? 'bg-[#C9A24D]/5 border-l-4 border-l-[#C9A24D]' : ''}`}
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="text-sm font-bold text-[#0B1C2D] truncate">
+                          {app.fullName || 'Unknown Applicant'}
+                        </h4>
+                        <span
+                          className={`text-[7px] uppercase tracking-widest px-2 py-0.5 rounded-full font-bold ${
+                            app.status === 'Approved'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : app.status === 'Declined'
+                                ? 'bg-rose-100 text-rose-700'
+                                : 'bg-stone-100 text-stone-500'
+                          }`}
+                        >
+                          {app.status}
+                        </span>
+                      </div>
+                      <p className="text-[9px] text-stone-400 uppercase tracking-widest font-medium">
+                        {app.program || 'N/A'}
+                      </p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -507,7 +731,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <div>
                       <div className="flex items-center gap-4 mb-2">
                         <h2 className="text-3xl sm:text-4xl font-black text-[#0B1C2D]">
-                          {selectedApp.fullName}
+                          {selectedApp.fullName || 'Unknown Applicant'}
                         </h2>
                         <span
                           className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
@@ -522,7 +746,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </span>
                       </div>
                       <p className="text-stone-400 text-xs font-medium uppercase tracking-widest">
-                        {selectedApp.email}
+                        {selectedApp.email || 'N/A'}
                       </p>
                     </div>
                   </div>
@@ -534,7 +758,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           Ministerial Background
                         </h5>
                         <div className="bg-stone-50 p-6 rounded-2xl text-stone-700 text-sm leading-relaxed border border-stone-100">
-                          {selectedApp.experience}
+                          {selectedApp.experience || 'N/A'}
                         </div>
                       </section>
                       <section>
@@ -542,7 +766,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           Statement of Intent
                         </h5>
                         <div className="bg-stone-50 p-6 rounded-2xl text-stone-700 text-sm leading-relaxed border border-stone-100">
-                          {selectedApp.statement}
+                          {selectedApp.statement || 'N/A'}
                         </div>
                       </section>
                     </div>
@@ -568,9 +792,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                       {comm.subject}
                                     </h6>
                                     <span className="text-[8px] text-stone-300 font-mono">
-                                      {new Date(
-                                        comm.timestamp
-                                      ).toLocaleString()}
+                                      {new Date(comm.timestamp).toLocaleString()}
                                     </span>
                                   </div>
                                   <p className="text-stone-500 text-[11px] leading-relaxed italic line-clamp-2">
