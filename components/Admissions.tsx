@@ -181,19 +181,16 @@ const Admissions: React.FC<AdmissionsProps> = ({
             statement: formData.statement,
             status: 'New',
             acknowledgmentText: decree, // Store decree
-            phone: formData.phone, // Include phone if you have the column
+            phone: formData.phone || null, // Optional phone
           },
         ])
         .select();
 
       if (insertError) {
         console.error('Supabase insert error:', insertError);
-        throw insertError; // This will go to catch block
+        throw insertError;
       }
 
-      console.log('Application saved to Supabase successfully:', insertedData);
-
-      // Keep your original onSubmit call
       onSubmit({
         ...formData,
         acknowledgmentText: decree,
@@ -205,7 +202,6 @@ const Admissions: React.FC<AdmissionsProps> = ({
     } catch (error) {
       console.error('Submission Error:', error);
       setIsDispatching(false);
-      // Fallback: still show receipt even if Supabase fails
       onSubmit({
         ...formData,
         acknowledgmentText: personalDecree || 'Fallback decree due to error.',
@@ -385,6 +381,17 @@ const Admissions: React.FC<AdmissionsProps> = ({
             >
               Return Home
             </button>
+            <a
+              href="https://chat.whatsapp.com/LgsrV7l1Gw69UyKHBp3S0M"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto px-10 py-5 bg-emerald-600 text-white rounded-full text-[10px] font-black uppercase tracking-[0.4em] hover:bg-emerald-700 transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.412-.003 6.557-5.338 11.892-11.893 11.892-1.912-.001-3.793-.457-5.47-1.32l-6.537 1.728zm11.887-21.547c-5.319 0-9.648 4.328-9.65 9.649 0 2.115.682 4.102 1.954 5.714l-1.033 3.77 3.868-1.015c1.551.846 3.297 1.293 5.071 1.294h.004c5.318 0 9.648-4.33 9.65-9.651 0-2.578-1.003-5.002-2.824-6.824-1.821-1.822-4.246-2.824-6.83-2.825zm5.291 7.235c-.289-.145-1.713-.847-1.978-.942-.264-.096-.458-.145-.65.145-.192.291-.745.942-.913 1.135-.167.194-.335.218-.624.073-.289-.145-1.22-.449-2.324-1.433-.859-.767-1.439-1.714-1.607-2.005-.168-.291-.018-.448.126-.592.13-.129.289-.338.434-.508.145-.17.193-.29.289-.483.097-.193.048-.363-.024-.508-.072-.146-.65-1.568-.89-2.148-.234-.56-.471-.484-.65-.494-.168-.008-.362-.01-.555-.01-.192 0-.506.072-.77.362-.265.291-1.012.99-1.012 2.416 0 1.426 1.036 2.804 1.18 3.0z" />
+              </svg>
+              Join WhatsApp Group
+            </a>
             <button
               onClick={() => window.print()}
               className="w-full sm:w-auto px-10 py-5 border border-stone-200 bg-white text-stone-400 rounded-full text-[10px] font-black uppercase tracking-[0.4em] hover:text-[#0B1C2D] hover:border-[#0B1C2D] transition-all shadow-md active:scale-95"
@@ -555,7 +562,6 @@ const Admissions: React.FC<AdmissionsProps> = ({
                       </label>
                       <input
                         type="tel"
-                        required
                         className="w-full bg-stone-50 border-none p-6 rounded-2xl text-base outline-none focus:ring-1 focus:ring-[#C9A24D] shadow-inner"
                         value={formData.phone}
                         onChange={(e) =>
@@ -728,36 +734,3 @@ const Admissions: React.FC<AdmissionsProps> = ({
 };
 
 export default Admissions;
-<button
-  type="button"
-  onClick={async () => {
-    try {
-      const testData = {
-        full_name: "Test User",
-        email: "test@example.com",
-        program: "Nexus",
-        experience: "Test experience",
-        statement: "Test statement",
-        phone: "123456789",
-        acknowledgmentText: "Test decree"
-      };
-
-      console.log("Sending test insert:", testData);
-
-      const { data, error } = await supabase
-        .from('applications')
-        .insert([testData])
-        .select();
-
-      if (error) throw error;
-
-      console.log("Test insert SUCCESS:", data);
-      alert("Test row saved! Check Supabase table.");
-    } catch (err) {
-      console.error("Test insert FAILED:", err);
-      alert("Failed — check console for error");
-    }
-  }}
->
-  Quick Test Insert
-</button>

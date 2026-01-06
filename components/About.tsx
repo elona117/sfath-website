@@ -65,7 +65,7 @@ const About: React.FC = () => {
                 The Vision
               </h2>
               <p className="text-stone-500 text-lg font-light leading-relaxed">
-                Raising effective Kingdom Ambbassadors that will carry the glory of God acroos the nations of the earth"
+                "Raising effective Kingdom Ambbassadors that will carry the glory of God across the nations of the earth"
               </p>
             </div>
 
