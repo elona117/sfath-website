@@ -38,14 +38,14 @@ const TrainingSystems: React.FC<TrainingSystemsProps> = ({
         </svg>
       ),
       description:
-        'Essential doctrines and specific apostolic mandates. Recalibrating identity for institutional weight.',
+        'Establishing believers in the faith and equipping them for practical Christian living.',
       duration: '12 Weeks',
       mode: 'Online & Hybrid',
       outcomes: [
         'Biblical Worldview',
-        'Apostolic Governance',
+        'Strengthened Conviction',
         'Prayer/Intercession',
-        'Covenant Membership',
+        'Understanding Spiritual Disciplines',
       ],
     },
     {

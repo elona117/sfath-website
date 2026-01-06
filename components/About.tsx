@@ -3,16 +3,16 @@ import React from 'react';
 const About: React.FC = () => {
   const values = [
     {
-      title: 'Word & Spirit',
-      desc: 'Refusing to divorce the written Word from the active Spirit.',
+      title: 'Prayer and the Word',
+      desc: 'Refusing to divorce the written Word from the life of prayer.',
     },
     {
-      title: 'Character First',
+      title: 'Character Formation',
       desc: 'Believing anointing without character is a tragedy waiting to happen.',
     },
     {
-      title: 'Covenant',
-      desc: 'Building families, not just organizations. Loyalty is our currency.',
+      title: 'Fellowship',
+      desc: 'Building families, not just organization.',
     },
     {
       title: 'Excellence',
@@ -28,9 +28,9 @@ const About: React.FC = () => {
             Vision & Ethos
           </p>
           <h1 className="text-5xl sm:text-7xl font-black text-[#0B1C2D] mb-12 leading-none">
-            Restoring the{' '}
+            Spirit Filled{' '}
             <span className="italic font-serif text-[#C9A24D]">
-              Ancient Foundations
+              Disciples
             </span>
           </h1>
           <p className="text-stone-500 text-xl sm:text-2xl font-light leading-relaxed max-w-3xl mx-auto">
@@ -52,10 +52,10 @@ const About: React.FC = () => {
             </div>
             <div className="absolute -bottom-10 -right-10 w-2/3 aspect-[4/3] bg-[#0B1C2D] p-12 text-white shadow-2xl rounded-2xl hidden md:block">
               <p className="font-serif italic text-2xl text-[#C9A24D] mb-4">
-                "The faith once for all delivered..."
+                "Go therefore and make disciples..."
               </p>
               <p className="text-xs uppercase tracking-widest text-stone-400">
-                Jude 1:3
+                Matt. 28:19
               </p>
             </div>
           </div>
@@ -65,10 +65,7 @@ const About: React.FC = () => {
                 The Vision
               </h2>
               <p className="text-stone-500 text-lg font-light leading-relaxed">
-                To see a global company of Spirit-filled apostles raised to
-                advance the Kingdom with power, purity, and proper alignment.
-                SFATH is a formation center dedicated to the "faith once for all
-                delivered to the saints."
+                Raising effective Kingdom Ambbassadors that will carry the glory of God acroos the nations of the earth"
               </p>
             </div>
 

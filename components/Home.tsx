@@ -139,7 +139,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onViewProgram }) => {
 
           <h1 className="text-[10vw] sm:text-7xl lg:text-[8.5rem] font-black text-white mb-8 leading-[1] tracking-tighter max-w-5xl">
             Raising Spirit-Filled{' '}
-            <span className="italic font-serif text-[#C9A24D]">Apostles.</span>
+            <span className="italic font-serif text-[#C9A24D]">Disciples.</span>
           </h1>
 
           <p className="text-stone-300 text-base sm:text-xl lg:text-2xl font-light max-w-3xl mx-auto mb-12 leading-relaxed">
@@ -200,7 +200,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onViewProgram }) => {
             {[
               {
                 title: 'Spirit-Led Formation',
-                desc: 'Imparting transformation through the active presence of God, refusing to divorce the Word from the Spirit.',
+                desc: 'Imparting transformation through the tangible presence of God, refusing to divorce the Word from the Spirit.',
               },
               {
                 title: 'Apostolic Doctrine',

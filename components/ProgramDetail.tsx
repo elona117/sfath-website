@@ -14,11 +14,11 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({ program, onApply }) => {
           title: 'Nexus',
           tagline: 'The Foundational Gateway',
           objective:
-            'To provide a unified doctrinal base and clear apostolic perspective for new leaders.',
+            'To Establish believers in the faith and equip them for practical Christian living.',
           whoFor:
-            'Emerging leaders, seasoned ministers seeking new alignment, and ministry students.',
+            'Emerging leaders, seasoned ministers seeking new alignment, and new believers.',
           duration: '12 Weeks',
-          delivery: 'Online Interactive Modules + Monthly Synod',
+          delivery: 'Online Interactive Sessions + Onsite Sessions',
           outcomes: [
             'Apostolic Doctrinal Clarity',
             'Personal Calling Audit',

@@ -662,7 +662,7 @@ const Admissions: React.FC<AdmissionsProps> = ({
                 <div className="space-y-6">
                   <div>
                     <label className="block text-[10px] uppercase tracking-widest text-stone-400 font-black mb-4 ml-2">
-                      Ministerial Background
+                      Salvation Experience
                     </label>
                     <textarea
                       rows={4}
@@ -687,7 +687,7 @@ const Admissions: React.FC<AdmissionsProps> = ({
                       onChange={(e) =>
                         setFormData({ ...formData, statement: e.target.value })
                       }
-                      placeholder="Why SFATH?"
+                      placeholder="Why are you applying?"
                     />
                   </div>
                 </div>
@@ -717,7 +717,7 @@ const Admissions: React.FC<AdmissionsProps> = ({
                 type="submit"
                 className="flex-1 py-6 bg-[#0B1C2D] text-[#C9A24D] text-[11px] font-black uppercase tracking-[0.4em] rounded-full hover:bg-[#C9A24D] hover:text-[#0B1C2D] transition-all shadow-xl active:scale-[0.98]"
               >
-                {step === 3 ? 'Dispatch Integration' : 'Continue Integration'}
+                {step === 3 ? 'Apply' : 'Continue Integration'}
               </button>
             </div>
           </form>

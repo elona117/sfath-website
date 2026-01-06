@@ -17,9 +17,9 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate }) => {
   }, []);
 
   const navLinks: { label: string; view: ViewState }[] = [
-    { label: 'Vision', view: 'ABOUT' },
-    { label: 'Systems', view: 'TRAINING' },
-    { label: 'Portal', view: 'PORTAL' },
+    { label: 'ABOUT', view: 'ABOUT' },
+    { label: 'COURSES', view: 'TRAINING' },
+    { label: 'PROFILE', view: 'PORTAL' },
     { label: 'Leadership', view: 'LEADERSHIP' },
     { label: 'Vault', view: 'RESOURCES' },
     { label: 'Contact', view: 'CONTACT' },

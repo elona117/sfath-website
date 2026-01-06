@@ -46,7 +46,7 @@ const Contact: React.FC = () => {
                 Physical Location
               </h4>
               <p className="text-stone-500 font-light leading-relaxed">
-                123 Kingdom Way, City of Faith.
+                Maiduguri, Borno State. Nigeria.
                 <br />
                 Global Administration Hub.
               </p>
@@ -56,9 +56,9 @@ const Contact: React.FC = () => {
                 Direct Channels
               </h4>
               <p className="text-stone-500 font-light leading-relaxed">
-                info@sfath.org
+                info@spiritfilledapostolichub.org
                 <br />
-                +1 (555) 123-4567
+                +234 (902) 6142-492
               </p>
             </div>
           </div>
