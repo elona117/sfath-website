@@ -1,4 +1,3 @@
-// api/gemini.ts
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export default async function handler(req: any, res: any) {
@@ -24,6 +23,6 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ text });
   } catch (error: any) {
     console.error("Gemini error:", error);
-    return res.status(500).json({ error: error.message || "Failed to generate" });
+    return res.status(500).json({ error: error.message || "Failed to generate content" });
   }
 }
