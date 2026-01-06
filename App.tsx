@@ -209,38 +209,6 @@ const App: React.FC = () => {
     localStorage.setItem('sfath_applications', JSON.stringify(updated));
   };
 
-  // Handle back button for mobile devices
-  useEffect(() => {
-    const handlePopState = () => {
-      // If there's history, go back to previous view; otherwise, optionally handle exit
-      if (window.history.length > 1) {
-        // Custom logic to go back in your app's view state
-        // For example, if you have a view history stack, pop the last view
-        // Here, we'll assume going back to 'HOME' as a fallback
-        handleNavigate('HOME');
-      } else {
-        // Optional: Show a confirmation before exiting
-        if (window.confirm("Are you sure you want to leave the site?")) {
-          window.history.back(); // This will exit if no history
-        }
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-
-    // Push an initial state to enable back button
-    window.history.pushState({ view: 'HOME' }, '');
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, []);
-
-  // Update history state when view changes
-  useEffect(() => {
-    window.history.pushState({ view }, '');
-  }, [view]);
-
   return (
     <ErrorBoundary>
       <div className="min-h-screen flex flex-col bg-[#F9F9F7]">

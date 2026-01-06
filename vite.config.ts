@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
 
   return {
-    base: '/',  // Keep this for Vercel
+    base: '/',
 
     server: {
       port: 3000,
@@ -39,14 +39,12 @@ export default defineConfig(({ mode }) => {
     },
 
     build: {
-      chunkSizeWarningLimit: 1000,  // ← ADD THIS (increases limit to 1MB)
+      chunkSizeWarningLimit: 1000,
       rollupOptions: {
         output: {
           manualChunks: {
-            // Split heavy deps into separate chunks
-            'vendor': ['react', 'react-dom'],
-            'supabase': ['@supabase/supabase-js'],
-            // Add more if you have big libraries
+            vendor: ['react', 'react-dom'],
+            supabase: ['@supabase/supabase-js'],
           },
         },
       },

@@ -21,7 +21,6 @@ app.post('/api/gemini', async (req, res) => {
 
     console.log('Processing prompt:', prompt.substring(0, 100) + '...');
 
-    // Use the current fast model (Gemini 3 Flash preview - stable and fast as of Dec 2025)
     const model = genAI.getGenerativeModel({ 
       model: 'gemini-3-flash-preview',
       systemInstruction: `You are the Apostolic Guide for SFATH (Spirit Filled Apostolic Training Hub). 
