@@ -32,6 +32,7 @@ const App: React.FC = () => {
   const [isAdmissionsOpen, setIsAdmissionsOpen] = useState(true);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   // Loading States
   const [isGlobalLoading, setIsGlobalLoading] = useState(true);
@@ -50,6 +51,20 @@ const App: React.FC = () => {
     'Establishment Covenant Connection...',
     'Retrieving Ministerial Records...',
   ];
+
+  // --- INTERNET CONNECTION MONITOR ---
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // --- BROWSER HISTORY SYNC ---
   useEffect(() => {
@@ -235,6 +250,22 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <div className="min-h-screen flex flex-col bg-[#F9F9F7]">
+        
+        {/* NO INTERNET OVERLAY */}
+        {!isOnline && (
+          <div className="fixed inset-0 z-[2000] bg-[#0B1C2D] flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
+            <div className="w-20 h-20 mb-8 rounded-full border-2 border-red-500/30 flex items-center justify-center animate-pulse">
+              <svg className="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-3.536 5 5 0 011.414-3.536m0 0L5.636 5.636M3 3l18 18" />
+              </svg>
+            </div>
+            <h2 className="font-cinzel text-[#C9A24D] text-xl tracking-widest mb-4">CONNECTION SEVERED</h2>
+            <p className="text-stone-400 text-sm max-w-xs leading-relaxed uppercase tracking-tighter">
+              Apostolic uplink requires an active data stream. Please restore your connection to proceed.
+            </p>
+          </div>
+        )}
+
         {/* GLOBAL CHANCERY UPLINK LOADER */}
         {isGlobalLoading && (
           <div className="fixed inset-0 z-[1000] bg-[#0B1C2D] flex flex-col items-center justify-center p-6 animate-reveal">
@@ -299,7 +330,9 @@ const App: React.FC = () => {
 
         {/* Show public site always, show Login only when trying to access ADMIN without auth */}
         {view === 'ADMIN' && !isAdminAuthenticated ? (
-          <Login onLoginSuccess={handleLoginSuccess} />
+          <div className={!isOnline ? 'pointer-events-none' : ''}>
+             <Login onLoginSuccess={handleLoginSuccess} />
+          </div>
         ) : (
           <>
             <Navbar currentView={view} onNavigate={handleNavigate} />
