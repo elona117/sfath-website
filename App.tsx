@@ -51,6 +51,23 @@ const App: React.FC = () => {
     'Retrieving Ministerial Records...',
   ];
 
+  // --- BROWSER HISTORY SYNC ---
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state && event.state.view) {
+        setView(event.state.view);
+      } else {
+        setView('HOME');
+      }
+    };
+
+    // Initialize state for the first load
+    window.history.replaceState({ view: 'HOME' }, '', '');
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   // Uplink animation
   const triggerUplink = useCallback((onComplete: () => void) => {
     setIsGlobalLoading(true);
@@ -127,6 +144,12 @@ const App: React.FC = () => {
     setLoginError('');
     triggerUplink(() => {
       setView(newView);
+      
+      // Update history stack for back button support
+      if (window.history.state?.view !== newView) {
+        window.history.pushState({ view: newView }, '', '');
+      }
+      
       window.scrollTo(0, 0);
     });
   };
