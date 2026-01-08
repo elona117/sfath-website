@@ -382,7 +382,7 @@ const Admissions: React.FC<AdmissionsProps> = ({
               Return Home
             </button>
             <a
-              href="https://chat.whatsapp.com/LgsrV7l1Gw69UyKHBp3S0M"
+              href="https://chat.whatsapp.com/CejCgdY9Qld34OdH1qeiaw"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-auto px-10 py-5 bg-emerald-600 text-white rounded-full text-[10px] font-black uppercase tracking-[0.4em] hover:bg-emerald-700 transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2"
